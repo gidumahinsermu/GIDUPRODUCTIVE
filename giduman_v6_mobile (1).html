@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>GIDUMAN</title>
+</head>
+<body>
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">GIDUMAN study schedule with AI motivation assistant and resource materials</h2>
+<style>
+/* ===== MOBILE-FIRST RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;overflow-x:hidden;}
+input,select,textarea,button{font-family:inherit;}
+input,select{height:44px;padding:0 12px;border:1px solid var(--color-border-secondary,#d1d5db);background:var(--color-background-primary,#fff);color:var(--color-text-primary,#111);border-radius:8px;font-size:16px;width:100%;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 2px rgba(29,158,117,.15);}
+
+/* ===== LAYOUT ===== */
+.page-wrap{position:relative;max-width:600px;margin:0 auto;}
+.navbar{background:#1D9E75;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.brand{font-size:20px;font-weight:600;color:#fff;letter-spacing:1px;}
+.nav-stats{font-size:13px;color:#9FE1CB;}
+.body{padding:14px;}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:0;border:1px solid var(--color-border-secondary,#e5e7eb);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.tab{flex:1;padding:13px 10px;font-size:15px;font-weight:500;background:transparent;border:none;cursor:pointer;color:var(--color-text-secondary,#6b7280);text-align:center;}
+.tab.on{background:#1D9E75;color:#fff;}
+.tab:not(:last-child){border-right:1px solid var(--color-border-secondary,#e5e7eb);}
+
+/* ===== SUMMARY CARDS ===== */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.sc{background:var(--color-background-secondary,#f9fafb);border-radius:10px;padding:10px 6px;text-align:center;}
+.sl{font-size:11px;color:var(--color-text-secondary,#6b7280);margin-bottom:3px;}
+.sv{font-size:20px;font-weight:600;color:var(--color-text-primary,#111);}
+
+/* ===== ADD TASK SECTION ===== */
+.add-section{background:var(--color-background-primary,#fff);border:1px solid var(--color-border-tertiary,#e5e7eb);border-radius:12px;padding:14px;margin-bottom:16px;}
+.sec-title{font-size:14px;font-weight:600;color:var(--color-text-secondary,#6b7280);margin-bottom:10px;}
+.row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.row input,.row select{flex:1;min-width:0;}
+textarea{width:100%;resize:vertical;padding:10px 12px;border:1px solid var(--color-border-secondary,#d1d5db);border-radius:8px;font-size:15px;color:var(--color-text-primary,#111);background:var(--color-background-primary,#fff);min-height:52px;line-height:1.5;}
+.add-btn{background:#1D9E75;color:#fff;border:none;height:44px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;width:100%;margin-top:6px;}
+.add-btn:active{background:#0F6E56;}
+
+/* ===== NOTIF BAR ===== */
+.notif-bar{display:flex;align-items:center;gap:10px;background:var(--color-background-info,#eff6ff);border:1px solid var(--color-border-info,#bfdbfe);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-info,#1d4ed8);flex-wrap:wrap;}
+.notif-bar button{background:#1D9E75;color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;height:36px;}
+
+/* ===== FILTERS ===== */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+.fb{font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid var(--color-border-secondary,#d1d5db);background:transparent;color:var(--color-text-secondary,#6b7280);cursor:pointer;height:auto;}
+.fb.on{background:#1D9E75;color:#fff;border-color:#1D9E75;}
+.search-box{height:38px;flex:1;min-width:120px;font-size:14px;}
+
+/* ===== TASKS ===== */
+.tasks{display:flex;flex-direction:column;gap:10px;}
+.task{background:var(--color-background-primary,#fff);border:1px solid var(--color-border-tertiary,#e5e7eb);border-radius:12px;padding:14px;}
+.task.done-task{opacity:.5;}
+.task.overdue{border-color:#E24B4A;}
+.task-top{display:flex;align-items:flex-start;gap:12px;}
+.chk-wrap{flex-shrink:0;margin-top:1px;cursor:pointer;padding:4px;}
+.chk-circle{width:26px;height:26px;border-radius:50%;border:2px solid #1D9E75;background:transparent;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.chk-circle.on{background:#1D9E75;}
+.chk-circle.on::after{content:'';display:block;width:7px;height:12px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:15px;font-weight:500;color:var(--color-text-primary,#111);word-break:break-word;}
+.task-title.crossed{text-decoration:line-through;color:var(--color-text-secondary,#6b7280);}
+.task-note{font-size:14px;color:var(--color-text-secondary,#6b7280);margin-top:4px;line-height:1.5;word-break:break-word;}
+.task-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+.badge{font-size:11px;padding:3px 9px;border-radius:999px;font-weight:600;}
+.ph{background:#E6F1FB;color:#0C447C;}.pm{background:#FAEEDA;color:#633806;}.pl{background:#EAF3DE;color:#27500A;}
+.cb{background:var(--color-background-secondary,#f3f4f6);color:var(--color-text-secondary,#6b7280);border:1px solid var(--color-border-tertiary,#e5e7eb);}
+.time-badge{font-size:11px;padding:3px 9px;border-radius:999px;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;}
+.time-badge.overdue-b{background:#FCEBEB;color:#A32D2D;border-color:#E24B4A;}
+.remind-badge{font-size:11px;padding:3px 9px;border-radius:999px;background:#EEEDFE;color:#3C3489;border:1px solid #AFA9EC;}
+.date-badge{font-size:11px;color:var(--color-text-tertiary,#9ca3af);}
+.task-actions{display:flex;gap:2px;flex-shrink:0;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary,#9ca3af);padding:8px;border-radius:8px;font-size:18px;line-height:1;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;}
+.icon-btn:active{background:var(--color-background-secondary,#f3f4f6);}
+.icon-btn.danger:active{color:var(--color-text-danger,#dc2626);}
+.edit-box{margin-top:12px;border-top:1px solid var(--color-border-tertiary,#e5e7eb);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
+.er{display:flex;gap:8px;flex-wrap:wrap;}
+.er input,.er select,.er textarea{flex:1;font-size:15px;min-width:0;}
+.save-btn{background:#1D9E75;color:#fff;border:none;height:44px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;flex:1;}
+.cancel-btn{background:none;border:1px solid var(--color-border-secondary,#d1d5db);height:44px;border-radius:10px;font-size:15px;cursor:pointer;color:var(--color-text-secondary,#6b7280);}
+.del-confirm{margin-top:10px;background:var(--color-background-danger,#fef2f2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.del-confirm span{font-size:14px;color:var(--color-text-danger,#dc2626);}
+.del-yes{background:var(--color-text-danger,#dc2626);color:#fff;border:none;height:42px;padding:0 18px;border-radius:10px;font-size:14px;cursor:pointer;}
+.del-no{background:none;border:1px solid var(--color-border-danger,#fca5a5);color:var(--color-text-danger,#dc2626);height:42px;padding:0 14px;border-radius:10px;font-size:14px;cursor:pointer;}
+.empty{text-align:center;padding:3rem 1rem;color:var(--color-text-tertiary,#9ca3af);font-size:14px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;padding:10px 24px;border-radius:999px;font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:9999;}
+.toast.show{opacity:1;}
+.fl{display:flex;flex-direction:column;flex:1;min-width:0;gap:4px;}
+.fl label{font-size:13px;color:var(--color-text-secondary,#6b7280);font-weight:500;}
+
+/* ===== AI ASSISTANT ===== */
+.ai-box{background:var(--color-background-primary,#fff);border:1px solid #5DCAA5;border-radius:14px;padding:14px;margin-bottom:18px;}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ai-avatar{width:42px;height:42px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;flex-shrink:0;}
+.ai-title{font-size:15px;font-weight:600;color:var(--color-text-primary,#111);}
+.ai-sub{font-size:12px;color:var(--color-text-secondary,#6b7280);}
+.ai-messages{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.ai-msg{padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.6;max-width:92%;word-break:break-word;}
+.ai-msg.bot{background:#E1F5EE;color:#085041;align-self:flex-start;border-bottom-left-radius:4px;}
+.ai-msg.user{background:#1D9E75;color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.ai-msg.thinking{background:var(--color-background-secondary,#f3f4f6);color:var(--color-text-tertiary,#9ca3af);font-style:italic;}
+.ai-input-row{display:flex;gap:8px;}
+.ai-input-row input{flex:1;font-size:15px;height:44px;}
+.ai-send{background:#1D9E75;color:#fff;border:none;padding:0 18px;height:44px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.ai-send:active{background:#0F6E56;}
+.ai-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.chip{font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid #5DCAA5;color:#085041;background:#E1F5EE;cursor:pointer;}
+.chip:active{background:#9FE1CB;}
+
+/* ===== STUDY SLOTS ===== */
+.study-page{display:flex;flex-direction:column;gap:14px;}
+.slot-card{background:var(--color-background-primary,#fff);border:1px solid var(--color-border-tertiary,#e5e7eb);border-radius:14px;overflow:hidden;}
+.slot-header{display:flex;align-items:center;gap:10px;padding:14px 16px;}
+.slot-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.slot-info{flex:1;min-width:0;}
+.slot-name{font-size:15px;font-weight:600;color:var(--color-text-primary,#111);}
+.slot-time{font-size:12px;color:var(--color-text-secondary,#6b7280);}
+.slot-count{font-size:12px;padding:4px 10px;border-radius:999px;font-weight:600;white-space:nowrap;}
+.slot-body{padding:0 14px 14px;}
+.progress-bar{height:5px;background:var(--color-border-tertiary,#e5e7eb);margin-bottom:12px;border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:#1D9E75;border-radius:3px;transition:width 0.3s;}
+.subj-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary,#e5e7eb);background:var(--color-background-secondary,#f9fafb);margin-bottom:7px;}
+.subj-circle{width:24px;height:24px;border-radius:50%;border:2px solid #1D9E75;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.subj-circle.on{background:#1D9E75;}
+.subj-circle.on::after{content:'';display:block;width:6px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.subj-name{flex:1;font-size:15px;color:var(--color-text-primary,#111);word-break:break-word;}
+.subj-name.crossed{text-decoration:line-through;color:var(--color-text-secondary,#6b7280);}
+.subj-dur{font-size:12px;color:var(--color-text-secondary,#6b7280);white-space:nowrap;}
+.subj-del{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary,#9ca3af);font-size:20px;padding:4px 6px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;}
+.subj-del:active{color:var(--color-text-danger,#dc2626);}
+.add-subj-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.add-subj-row input{flex:2;min-width:0;font-size:15px;}
+.add-subj-row input[type="number"]{flex:0 0 70px;max-width:70px;}
+.add-subj-btn{background:#1D9E75;color:#fff;border:none;height:44px;padding:0 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.add-subj-btn:active{background:#0F6E56;}
+.icon-wake{background:#FAEEDA;}.icon-morn{background:#E1F5EE;}.icon-aft{background:#E6F1FB;}.icon-night{background:#EEEDFE;}
+.count-wake{background:#FAEEDA;color:#633806;}.count-morn{background:#E1F5EE;color:#085041;}.count-aft{background:#E6F1FB;color:#0C447C;}.count-night{background:#EEEDFE;color:#3C3489;}
+
+/* ===== RESOURCE MATERIAL ===== */
+.res-section{margin-top:12px;border-top:1px solid var(--color-border-tertiary,#e5e7eb);padding-top:12px;}
+.res-title{font-size:12px;font-weight:600;color:var(--color-text-secondary,#6b7280);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.res-title span{background:#EEEDFE;color:#3C3489;border-radius:999px;padding:2px 10px;font-size:11px;}
+.res-textarea{width:100%;min-height:80px;font-size:14px;color:var(--color-text-primary,#111);background:var(--color-background-secondary,#f9fafb);border:1px solid var(--color-border-tertiary,#e5e7eb);border-radius:10px;padding:10px 12px;resize:vertical;line-height:1.6;}
+.res-textarea:focus{outline:none;border-color:#5DCAA5;}
+.res-save{margin-top:8px;background:none;border:1px solid #5DCAA5;color:#085041;padding:8px 18px;border-radius:10px;font-size:14px;cursor:pointer;height:40px;}
+.res-save:active{background:#E1F5EE;}
+.res-saved{font-size:12px;color:#1D9E75;margin-left:8px;opacity:0;transition:opacity 0.3s;}
+.res-saved.show{opacity:1;}
+
+/* ===== SLOT TIME EDITOR ===== */
+.slot-time-row{display:flex;gap:8px;align-items:center;padding:0 14px 12px;flex-wrap:wrap;}
+.slot-time-row label{font-size:12px;color:var(--color-text-secondary,#6b7280);white-space:nowrap;}
+.slot-time-row input[type="time"]{flex:1;min-width:0;height:38px;font-size:14px;padding:0 8px;}
+.slot-time-sep{font-size:13px;color:var(--color-text-tertiary,#9ca3af);}
+.slot-time-save{background:#1D9E75;color:#fff;border:none;height:38px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.slot-time-save:active{background:#0F6E56;}
+
+/* ===== CLEAR CHAT BUTTON ===== */
+.ai-clear{background:none;border:1px solid var(--color-border-secondary,#d1d5db);color:var(--color-text-secondary,#6b7280);padding:4px 12px;border-radius:999px;font-size:12px;cursor:pointer;white-space:nowrap;}
+.ai-clear:active{background:var(--color-background-secondary,#f3f4f6);}
+
+/* ===== MOBILE SAFE AREA ===== */
+@supports(padding:max(0px)){
+  .navbar{padding-top:max(14px,env(safe-area-inset-top));}
+  .body{padding-bottom:max(14px,env(safe-area-inset-bottom));}
+}
+</style>
+
+<div class="page-wrap">
+<div class="toast" id="toast"></div>
+<div class="navbar">
+  <span class="brand">GIDUMAN</span>
+  <span class="nav-stats" id="nav-stats">0 tasks</span>
+</div>
+<div class="body">
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('tasks',this)">My Tasks</button>
+    <button class="tab" onclick="switchTab('study',this)">Study Schedule</button>
+  </div>
+
+  <!-- TASKS TAB -->
+  <div id="tab-tasks">
+    <div class="summary">
+      <div class="sc"><div class="sl">Total</div><div class="sv" id="s-total">0</div></div>
+      <div class="sc"><div class="sl">Active</div><div class="sv" id="s-active">0</div></div>
+      <div class="sc"><div class="sl">Done</div><div class="sv" id="s-done">0</div></div>
+      <div class="sc"><div class="sl">Overdue</div><div class="sv" id="s-overdue" style="color:var(--color-text-danger);">0</div></div>
+    </div>
+    <div class="notif-bar" id="notif-bar" style="display:none;">
+      <span>&#128276; Enable notifications to get task reminders.</span>
+      <button onclick="requestNotifPerm()">Enable</button>
+    </div>
+    <div class="add-section">
+      <div class="sec-title">Add new task</div>
+      <div class="row">
+        <input type="text" id="inp-title" placeholder="Task title..." style="flex:2;" />
+        <select id="inp-pri" style="max-width:120px;"><option value="low">Low</option><option value="med" selected>Medium</option><option value="high">High</option></select>
+        <select id="inp-cat" style="max-width:130px;"><option value="">No category</option><option value="Work">Work</option><option value="Personal">Personal</option><option value="Shopping">Shopping</option><option value="Health">Health</option><option value="Study">Study</option><option value="Other">Other</option></select>
+      </div>
+      <div class="row">
+        <div class="fl"><label>Due date &amp; time</label><input type="datetime-local" id="inp-due" /></div>
+        <div class="fl"><label>Remind me before</label><select id="inp-remind"><option value="">No reminder</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="1440">1 day</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px;"><textarea id="inp-note" placeholder="Notes (optional)..." style="min-height:52px;"></textarea><button class="add-btn" onclick="addTask()">+ Add task</button></div>
+    </div>
+    <div class="filters">
+      <button class="fb on" onclick="setFilter('all',this)">All</button>
+      <button class="fb" onclick="setFilter('active',this)">Active</button>
+      <button class="fb" onclick="setFilter('done',this)">Done</button>
+      <button class="fb" onclick="setFilter('overdue',this)">Overdue</button>
+      <button class="fb" onclick="setFilter('high',this)">High priority</button>
+      <input class="search-box" type="text" id="search" placeholder="Search..." oninput="renderTasks()" />
+    </div>
+    <div class="tasks" id="task-list"></div>
+  </div>
+
+  <!-- STUDY TAB -->
+  <div id="tab-study" style="display:none;">
+    <!-- AI MOTIVATION ASSISTANT -->
+    <div class="ai-box">
+      <div class="ai-header">
+        <div class="ai-avatar">&#129504;</div>
+        <div style="flex:1;min-width:0;"><div class="ai-title">GIDU — Your Study AI</div><div class="ai-sub">Ask me anything about studying, motivation, or tips</div></div>
+        <button class="ai-clear" onclick="clearAIChat()">Clear chat</button>
+      </div>
+      <div class="ai-messages" id="ai-msgs"></div>
+      <div class="ai-chips">
+        <div class="chip" onclick="askAI('Motivate me to study today')">Motivate me</div>
+        <div class="chip" onclick="askAI('Give me a study tip for better focus')">Study tips</div>
+        <div class="chip" onclick="askAI('How do I avoid procrastination?')">Beat procrastination</div>
+        <div class="chip" onclick="askAI('Create a quick study plan for my schedule')">Study plan</div>
+        <div class="chip" onclick="askAI('How do I memorize things faster?')">Memory tricks</div>
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="ai-input" placeholder="Ask GIDU anything..." onkeydown="if(event.key==='Enter')sendAI()" />
+        <button class="ai-send" onclick="sendAI()">Send</button>
+      </div>
+    </div>
+
+    <!-- STUDY STATS -->
+    <div class="summary">
+      <div class="sc"><div class="sl">Total subjects</div><div class="sv" id="ss-total">0</div></div>
+      <div class="sc"><div class="sl">Done today</div><div class="sv" id="ss-done" style="color:#1D9E75;">0</div></div>
+      <div class="sc"><div class="sl">Remaining</div><div class="sv" id="ss-rem">0</div></div>
+    </div>
+
+    <div class="study-page" id="study-slots"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const SK='giduman_v5',SSK='giduman_study_v2',RK='giduman_resources_v1';
+let tasks=[],filter='all',editingId=null,confirmId=null,nextId=1;
+let studySlots={
+  wake:{name:'Morning Wake Up',icon:'🌅',time:'5:00 AM – 7:00 AM',startTime:'05:00',endTime:'07:00',subjects:[]},
+  morning:{name:'Morning',icon:'☀️',time:'7:00 AM – 12:00 PM',startTime:'07:00',endTime:'12:00',subjects:[]},
+  afternoon:{name:'Afternoon',icon:'🌤',time:'12:00 PM – 5:00 PM',startTime:'12:00',endTime:'17:00',subjects:[]},
+  night:{name:'Night',icon:'🌙',time:'7:00 PM – 11:00 PM',startTime:'19:00',endTime:'23:00',subjects:[]}
+};
+let resources={wake:'',morning:'',afternoon:'',night:''};
+let subjNextId=1;
+const timers={};
+let aiHistory=[];
+
+function loadTasks(){
+  try{const r=localStorage.getItem(SK);if(r){tasks=JSON.parse(r);nextId=Math.max(...tasks.map(t=>t.id),0)+1;}}catch(e){tasks=[];}
+  if(!tasks.length){tasks=[{id:1,title:'Welcome to GIDUMAN!',note:'Check the Study Schedule tab.',priority:'med',category:'Personal',done:false,created:Date.now(),due:'',remind:''},{id:2,title:'Complete homework',note:'',priority:'high',category:'Study',done:false,created:Date.now()-60000,due:'',remind:''}];nextId=3;saveTasks();}
+}
+function saveTasks(){try{localStorage.setItem(SK,JSON.stringify(tasks));}catch(e){}}
+function loadStudy(){
+  try{const r=localStorage.getItem(SSK);if(r){const d=JSON.parse(r);Object.keys(d).forEach(k=>{if(studySlots[k]){studySlots[k].subjects=d[k].subjects||[];if(d[k].startTime)studySlots[k].startTime=d[k].startTime;if(d[k].endTime)studySlots[k].endTime=d[k].endTime;subjNextId=Math.max(subjNextId,...studySlots[k].subjects.map(s=>s.id||0))+1;}});}}catch(e){}
+  try{const r=localStorage.getItem(RK);if(r){const d=JSON.parse(r);Object.keys(d).forEach(k=>{if(k in resources)resources[k]=d[k];});}}catch(e){}
+}
+function saveStudy(){try{const d={};Object.keys(studySlots).forEach(k=>{d[k]={subjects:studySlots[k].subjects,startTime:studySlots[k].startTime,endTime:studySlots[k].endTime};});localStorage.setItem(SSK,JSON.stringify(d));}catch(e){}}
+function saveResources(){try{localStorage.setItem(RK,JSON.stringify(resources));}catch(e){}}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('tab-tasks').style.display=tab==='tasks'?'block':'none';
+  document.getElementById('tab-study').style.display=tab==='study'?'block':'none';
+  if(tab==='study'){renderStudy();if(aiHistory.length===0)initAI();}
+}
+
+function checkNotifBar(){const b=document.getElementById('notif-bar');if(typeof Notification!=='undefined'&&Notification.permission==='default')b.style.display='flex';else b.style.display='none';}
+function requestNotifPerm(){if(typeof Notification==='undefined'){toast('Not supported.');return;}Notification.requestPermission().then(p=>{checkNotifBar();if(p==='granted'){toast('Enabled!');scheduleAll();}else toast('Blocked.');});}
+function scheduleAll(){Object.values(timers).forEach(clearTimeout);tasks.forEach(t=>{if(!t.done&&t.due&&t.remind)scheduleReminder(t);});}
+function scheduleReminder(t){if(typeof Notification==='undefined'||Notification.permission!=='granted'||!t.due||!t.remind)return;const delay=new Date(t.due).getTime()-parseInt(t.remind)*60000-Date.now();if(delay<=0)return;if(timers[t.id])clearTimeout(timers[t.id]);timers[t.id]=setTimeout(()=>new Notification('GIDUMAN',{body:t.title+' is due in '+t.remind+' min'}),delay);}
+
+function addTask(){
+  const title=document.getElementById('inp-title').value.trim();if(!title){document.getElementById('inp-title').focus();return;}
+  const t={id:nextId++,title,note:document.getElementById('inp-note').value.trim(),priority:document.getElementById('inp-pri').value,category:document.getElementById('inp-cat').value,due:document.getElementById('inp-due').value,remind:document.getElementById('inp-remind').value,done:false,created:Date.now()};
+  tasks.unshift(t);
+  document.getElementById('inp-title').value='';document.getElementById('inp-note').value='';document.getElementById('inp-due').value='';document.getElementById('inp-remind').value='';
+  saveTasks();scheduleReminder(t);toast('Task saved!');renderTasks();
+}
+function toggleDone(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;if(t.done&&timers[id]){clearTimeout(timers[id]);delete timers[id];}saveTasks();renderTasks();}}
+function deleteTask(id){if(timers[id]){clearTimeout(timers[id]);delete timers[id];}tasks=tasks.filter(t=>t.id!==id);confirmId=null;saveTasks();toast('Deleted.');renderTasks();}
+function setFilter(f,btn){filter=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTasks();}
+function startEdit(id){editingId=editingId===id?null:id;confirmId=null;renderTasks();}
+function saveEdit(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  const v=document.getElementById('et-'+id).value.trim();if(!v)return;
+  t.title=v;t.note=document.getElementById('en-'+id).value.trim();t.priority=document.getElementById('ep-'+id).value;t.category=document.getElementById('ec-'+id).value;t.due=document.getElementById('ed-'+id).value;t.remind=document.getElementById('er2-'+id).value;
+  editingId=null;if(timers[id])clearTimeout(timers[id]);if(!t.done)scheduleReminder(t);saveTasks();toast('Updated!');renderTasks();
+}
+function askDelete(id){confirmId=confirmId===id?null:id;editingId=null;renderTasks();}
+function isOverdue(t){return!t.done&&t.due&&new Date(t.due).getTime()<Date.now();}
+function priClass(p){return p==='high'?'ph':p==='med'?'pm':'pl';}
+function priLabel(p){return p==='high'?'High':p==='med'?'Medium':'Low';}
+function fmtDue(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function remindLabel(v){return{'5':'5 min','10':'10 min','15':'15 min','30':'30 min','60':'1 hr','1440':'1 day'}[v]||'';}
+
+function renderTasks(){
+  const q=((document.getElementById('search')||{}).value||'').toLowerCase();
+  let visible=tasks.filter(t=>{
+    if(filter==='active'&&t.done)return false;
+    if(filter==='done'&&!t.done)return false;
+    if(filter==='overdue'&&!isOverdue(t))return false;
+    if(filter==='high'&&(t.priority!=='high'||t.done))return false;
+    if(q&&!t.title.toLowerCase().includes(q)&&!(t.note||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  const total=tasks.length,done=tasks.filter(t=>t.done).length,overdue=tasks.filter(t=>isOverdue(t)).length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-active').textContent=total-done;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-overdue').textContent=overdue;
+  document.getElementById('nav-stats').textContent=total+' task'+(total!==1?'s':'');
+  const list=document.getElementById('task-list');
+  if(!visible.length){list.innerHTML='<div class="empty">No tasks found.</div>';return;}
+  list.innerHTML=visible.map(t=>{
+    const od=isOverdue(t);
+    return`<div class="task ${t.done?'done-task':''} ${od?'overdue':''}">
+      <div class="task-top">
+        <div class="chk-wrap" onclick="toggleDone(${t.id})"><div class="chk-circle ${t.done?'on':''}"></div></div>
+        <div class="task-body">
+          <div class="task-title ${t.done?'crossed':''}">${t.title}</div>
+          ${t.note?`<div class="task-note">${t.note}</div>`:''}
+          <div class="task-meta">
+            <span class="badge ${priClass(t.priority)}">${priLabel(t.priority)}</span>
+            ${t.category?`<span class="badge cb">${t.category}</span>`:''}
+            ${t.due?`<span class="time-badge ${od?'overdue-b':''}">&#128336; ${fmtDue(t.due)}${od?' · Overdue':''}</span>`:''}
+            ${t.remind&&!t.done?`<span class="remind-badge">&#128276; ${remindLabel(t.remind)} before</span>`:''}
+            <span class="date-badge">${fmtDate(t.created)}</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="icon-btn" onclick="startEdit(${t.id})">&#9998;</button>
+          <button class="icon-btn danger" onclick="askDelete(${t.id})">&#128465;</button>
+        </div>
+      </div>
+      ${confirmId===t.id?`<div class="del-confirm"><span>Delete this task?</span><div style="display:flex;gap:6px;"><button class="del-no" onclick="askDelete(${t.id})">Cancel</button><button class="del-yes" onclick="deleteTask(${t.id})">Delete</button></div></div>`:''}
+      ${editingId===t.id?`<div class="edit-box">
+        <div class="er"><input id="et-${t.id}" type="text" value="${t.title.replace(/"/g,'&quot;')}" /></div>
+        <div class="er"><textarea id="en-${t.id}" style="min-height:48px;">${t.note||''}</textarea></div>
+        <div class="er">
+          <select id="ep-${t.id}"><option value="low" ${t.priority==='low'?'selected':''}>Low</option><option value="med" ${t.priority==='med'?'selected':''}>Medium</option><option value="high" ${t.priority==='high'?'selected':''}>High</option></select>
+          <select id="ec-${t.id}"><option value="">No category</option><option value="Work" ${t.category==='Work'?'selected':''}>Work</option><option value="Personal" ${t.category==='Personal'?'selected':''}>Personal</option><option value="Shopping" ${t.category==='Shopping'?'selected':''}>Shopping</option><option value="Health" ${t.category==='Health'?'selected':''}>Health</option><option value="Study" ${t.category==='Study'?'selected':''}>Study</option><option value="Other" ${t.category==='Other'?'selected':''}>Other</option></select>
+        </div>
+        <div class="er">
+          <div class="fl"><label>Due date &amp; time</label><input id="ed-${t.id}" type="datetime-local" value="${t.due||''}" /></div>
+          <div class="fl"><label>Remind before</label><select id="er2-${t.id}"><option value="">No reminder</option><option value="5" ${t.remind==='5'?'selected':''}>5 min</option><option value="10" ${t.remind==='10'?'selected':''}>10 min</option><option value="15" ${t.remind==='15'?'selected':''}>15 min</option><option value="30" ${t.remind==='30'?'selected':''}>30 min</option><option value="60" ${t.remind==='60'?'selected':''}>1 hour</option><option value="1440" ${t.remind==='1440'?'selected':''}>1 day</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;"><button class="save-btn" onclick="saveEdit(${t.id})">Save changes</button><button class="cancel-btn" onclick="startEdit(${t.id})">Cancel</button></div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* ---- AI ASSISTANT ---- */
+function initAI(){
+  const h=new Date().getHours();
+  let greeting='Good day';
+  if(h<7)greeting='Good early morning';
+  else if(h<12)greeting='Good morning';
+  else if(h<17)greeting='Good afternoon';
+  else greeting='Good evening';
+  const total=Object.values(studySlots).reduce((a,s)=>a+s.subjects.length,0);
+  const done=Object.values(studySlots).reduce((a,s)=>a+s.subjects.filter(x=>x.done).length,0);
+  let msg=`${greeting}! I'm GIDU, your personal study assistant. `;
+  if(total===0)msg+="You haven't added any subjects yet. Start by adding subjects to your time slots below, and I'll help you stay on track!";
+  else if(done===total&&total>0)msg+=`Amazing work — you've completed all ${total} subjects today! You're absolutely crushing it. Take a well-deserved break!`;
+  else msg+=`You have ${total-done} of ${total} subjects remaining today. You've got this — every session brings you closer to your goal. Let's make today count!`;
+  addAIMsg('bot',msg);
+}
+
+function addAIMsg(role,text){
+  aiHistory.push({role,text});
+  renderAIMsgs();
+}
+
+function renderAIMsgs(){
+  const c=document.getElementById('ai-msgs');
+  if(!c)return;
+  c.innerHTML=aiHistory.map(m=>`<div class="ai-msg ${m.role}">${m.text}</div>`).join('');
+  c.scrollTop=c.scrollHeight;
+}
+
+function askAI(prompt){
+  document.getElementById('ai-input').value=prompt;
+  sendAI();
+}
+
+async function sendAI(){
+  const inp=document.getElementById('ai-input');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  addAIMsg('user',msg);
+
+  const total=Object.values(studySlots).reduce((a,s)=>a+s.subjects.length,0);
+  const done=Object.values(studySlots).reduce((a,s)=>a+s.subjects.filter(x=>x.done).length,0);
+  const subjects=Object.entries(studySlots).map(([k,s])=>`${s.name}: ${s.subjects.map(x=>x.name+(x.done?' (done)':'')).join(', ')||'none'}`).join(' | ');
+
+  addAIMsg('thinking','GIDU is thinking...');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are GIDU, a warm, energetic, and highly motivating AI study assistant inside the GIDUMAN productivity app. 
+The student's current study schedule: ${subjects}. 
+They have completed ${done} out of ${total} subjects today.
+Keep responses concise (2-4 sentences), encouraging, and practical. Use simple language. 
+If they ask for a study plan or tips, tailor advice to their actual subjects listed above.
+Never use markdown formatting or asterisks. Be personal and upbeat.`,
+        messages:[...aiHistory.filter(m=>m.role==='user'||m.role==='bot').slice(-10).map(m=>({role:m.role==='user'?'user':'assistant',content:m.text})),{role:'user',content:msg}]
+      })
+    });
+    const data=await res.json();
+    aiHistory=aiHistory.filter(m=>m.text!=='GIDU is thinking...');
+    const reply=data.content&&data.content[0]?data.content[0].text:'I am here to help you study! Try asking me for motivation or study tips.';
+    addAIMsg('bot',reply);
+  }catch(e){
+    aiHistory=aiHistory.filter(m=>m.text!=='GIDU is thinking...');
+    addAIMsg('bot','I am here to cheer you on! Keep going — every minute of study is an investment in your future. You have got this!');
+  }
+}
+
+/* ---- STUDY SLOTS ---- */
+const slotColors={wake:{icon:'icon-wake',count:'count-wake'},morning:{icon:'icon-morn',count:'count-morn'},afternoon:{icon:'icon-aft',count:'count-aft'},night:{icon:'icon-night',count:'count-night'}};
+
+function addSubject(k){
+  const n=document.getElementById('sn-'+k).value.trim();if(!n)return;
+  const dur=document.getElementById('sd-'+k).value;
+  studySlots[k].subjects.push({id:subjNextId++,name:n,duration:dur,done:false});
+  document.getElementById('sn-'+k).value='';
+  saveStudy();renderStudy();toast('Subject added!');
+}
+function toggleSubj(k,id){const s=studySlots[k].subjects.find(s=>s.id===id);if(s){s.done=!s.done;saveStudy();renderStudy();}}
+function deleteSubj(k,id){studySlots[k].subjects=studySlots[k].subjects.filter(s=>s.id!==id);saveStudy();renderStudy();toast('Removed.');}
+
+function saveResource(k){
+  const el=document.getElementById('res-'+k);
+  if(!el)return;
+  resources[k]=el.value;
+  saveResources();
+  const saved=document.getElementById('res-saved-'+k);
+  if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
+}
+
+function fmt12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';const hh=h%12||12;return hh+':'+(m<10?'0':'')+m+' '+ampm;}
+function saveSlotTime(k){
+  const s=document.getElementById('st-'+k).value;
+  const e=document.getElementById('et2-'+k).value;
+  if(!s||!e){toast('Set both start and end time.');return;}
+  studySlots[k].startTime=s;studySlots[k].endTime=e;
+  studySlots[k].time=fmt12(s)+' – '+fmt12(e);
+  saveStudy();renderStudy();toast('Time updated!');
+}
+function clearAIChat(){
+  aiHistory=[];
+  renderAIMsgs();
+  initAI();
+  toast('Chat cleared!');
+}
+function renderStudy(){
+  let totalS=0,doneS=0;
+  Object.keys(studySlots).forEach(k=>{totalS+=studySlots[k].subjects.length;doneS+=studySlots[k].subjects.filter(s=>s.done).length;});
+  document.getElementById('ss-total').textContent=totalS;
+  document.getElementById('ss-done').textContent=doneS;
+  document.getElementById('ss-rem').textContent=totalS-doneS;
+
+  document.getElementById('study-slots').innerHTML=Object.keys(studySlots).map(k=>{
+    const sl=studySlots[k],col=slotColors[k];
+    const done=sl.subjects.filter(s=>s.done).length,total=sl.subjects.length;
+    const pct=total>0?Math.round(done/total*100):0;
+    return`<div class="slot-card">
+      <div class="slot-header">
+        <div class="slot-icon ${col.icon}">${sl.icon}</div>
+        <div class="slot-info"><div class="slot-name">${sl.name}</div><div class="slot-time">${sl.time}</div></div>
+        <span class="slot-count badge ${col.count}">${done}/${total} done</span>
+      </div>
+      <div class="slot-time-row">
+        <label>Start</label>
+        <input type="time" id="st-${k}" value="${sl.startTime||''}" />
+        <span class="slot-time-sep">–</span>
+        <label>End</label>
+        <input type="time" id="et2-${k}" value="${sl.endTime||''}" />
+        <button class="slot-time-save" onclick="saveSlotTime('${k}')">Save</button>
+      </div>
+      <div class="slot-body">
+        ${total>0?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`:''}
+        ${sl.subjects.length===0?`<div style="font-size:13px;color:var(--color-text-tertiary);margin-bottom:8px;">No subjects yet. Add one below.</div>`:''}
+        ${sl.subjects.map(s=>`<div class="subj-item">
+          <div class="subj-circle ${s.done?'on':''}" onclick="toggleSubj('${k}',${s.id})"></div>
+          <span class="subj-name ${s.done?'crossed':''}">${s.name}</span>
+          ${s.duration?`<span class="subj-dur">${s.duration} min</span>`:''}
+          <button class="subj-del" onclick="deleteSubj('${k}',${s.id})">&#215;</button>
+        </div>`).join('')}
+        <div class="add-subj-row">
+          <input id="sn-${k}" type="text" placeholder="Subject name (e.g. Math, Biology)..." style="flex:2;" onkeydown="if(event.key==='Enter')addSubject('${k}')" />
+          <input id="sd-${k}" type="number" min="5" max="480" value="30" placeholder="Min" style="max-width:68px;" />
+          <button class="add-subj-btn" onclick="addSubject('${k}')">+ Add</button>
+        </div>
+        <div class="res-section">
+          <div class="res-title">Resource material &amp; notes <span>for ${sl.name}</span></div>
+          <textarea class="res-textarea" id="res-${k}" placeholder="Write your notes, resources, links, formulas, or anything you need to study during ${sl.name}...">${resources[k]||''}</textarea>
+          <div style="display:flex;align-items:center;">
+            <button class="res-save" onclick="saveResource('${k}')">Save notes</button>
+            <span class="res-saved" id="res-saved-${k}">Saved!</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='inp-title')addTask();});
+loadTasks();loadStudy();checkNotifBar();scheduleAll();renderTasks();
+setInterval(renderTasks,60000);
+</script>
+</body>
+</html>
